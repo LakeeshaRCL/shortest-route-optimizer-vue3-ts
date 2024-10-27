@@ -42,6 +42,13 @@ export class Graph{
   }
 
 
+  /**
+   * This function can be used to clear the graph
+   */
+  clear(){
+    this.nodes = [];
+  }
+
 
 
   /**
