@@ -3,53 +3,58 @@
 import {onMounted, ref, type Ref} from "vue";
 
 import type {NullableShortestPathData, NullableString} from "@/helpers/typeAliases";
-import {useGraphStore} from "@/stores/graphStore";
 import {Graph} from "@/helpers/classes/graph/graph";
+import axios from "axios";
+import {Node} from "@/helpers/classes/graph/node";
+
+// custom components
+import EchoedDataViewerComponent from "@/components/EchoedDataViewerComponent.vue";
 
 const image    = new URL('../assets/images/group_one.png', import.meta.url).href
-const graphStore = useGraphStore();
-
+let graph:Graph = new Graph();
 let shortestPathData: Ref<NullableShortestPathData> = ref(null);
 let graphNodeNames: Ref<string[]> = ref(["A", "B", "C", "D", "E", "F", "G", "H", "I"]);
 let fromNode: Ref<NullableString> = ref(null);
 let toNode: Ref<NullableString> = ref(null);
-
+let isLoading: Ref<boolean> = ref( false )
+let showEchoedData: Ref<boolean> = ref( false )
+let echoedResponse: Ref<object | null> = ref(null);
 
 
 function initGraph(){
-  // setting up the graphStore
+  // setting up the graph
 // add nodes
   graphNodeNames.value.forEach(gnn =>{
-    graphStore.addNode(gnn)
+    graph.addNode(new Node(gnn))
   })
 
 
 // define edges
-  graphStore.addEdge("A", "B", 4);
-  graphStore.addEdge("B", "A", 4);
-  graphStore.addEdge("A", "C", 6);
-  graphStore.addEdge("C", "A", 6);
-  graphStore.addEdge("C", "D", 8);
-  graphStore.addEdge("D", "C", 8);
-  graphStore.addEdge("D", "G", 1);
-  graphStore.addEdge("G", "D", 1);
-  graphStore.addEdge("G", "I", 5);
-  graphStore.addEdge("I", "G", 5);
-  graphStore.addEdge("I", "E", 8);
-  graphStore.addEdge("E", "I", 8);
-  graphStore.addEdge("E", "D", 4);
-  graphStore.addEdge("D", "E", 4);
-  graphStore.addEdge("E", "B", 2);
-  graphStore.addEdge("B", "F", 2);
-  graphStore.addEdge("F", "B", 2);
-  graphStore.addEdge("F", "E", 3);
-  graphStore.addEdge("E", "F", 3);
-  graphStore.addEdge("F", "G", 4);
-  graphStore.addEdge("G", "F", 4);
-  graphStore.addEdge("F", "H", 6);
-  graphStore.addEdge("H", "F", 6);
-  graphStore.addEdge("H", "G", 5);
-  graphStore.addEdge("G", "H", 5);
+  graph.addEdge("A", "B", 4);
+  graph.addEdge("B", "A", 4);
+  graph.addEdge("A", "C", 6);
+  graph.addEdge("C", "A", 6);
+  graph.addEdge("C", "D", 8);
+  graph.addEdge("D", "C", 8);
+  graph.addEdge("D", "G", 1);
+  graph.addEdge("G", "D", 1);
+  graph.addEdge("G", "I", 5);
+  graph.addEdge("I", "G", 5);
+  graph.addEdge("I", "E", 8);
+  graph.addEdge("E", "I", 8);
+  graph.addEdge("E", "D", 4);
+  graph.addEdge("D", "E", 4);
+  graph.addEdge("E", "B", 2);
+  graph.addEdge("B", "F", 2);
+  graph.addEdge("F", "B", 2);
+  graph.addEdge("F", "E", 3);
+  graph.addEdge("E", "F", 3);
+  graph.addEdge("F", "G", 4);
+  graph.addEdge("G", "F", 4);
+  graph.addEdge("F", "H", 6);
+  graph.addEdge("H", "F", 6);
+  graph.addEdge("H", "G", 5);
+  graph.addEdge("G", "H", 5);
 }
 
 
@@ -57,14 +62,75 @@ function clear(){
   shortestPathData.value = null;
   fromNode.value = null;
   toNode.value = null;
-  initGraph()
 }
+
 
 function calculateShortestPath(){
   if(fromNode.value !== null && toNode.value !== null) {
-    shortestPathData.value = graphStore.graph.getShortestPath(fromNode.value, toNode.value)
-    initGraph()
+    shortestPathData.value = graph.getShortestPath(fromNode.value, toNode.value)
   }
+}
+
+
+function setRandomNumbers(){
+  isLoading.value = true;
+  clear();
+
+  getRandomNumbers((numberOne : number, numberTwo: number)=>{
+    fromNode.value = graphNodeNames.value[numberOne];
+    toNode.value = graphNodeNames.value[numberTwo];
+    isLoading.value = false;
+  })
+}
+
+
+
+function getRandomNumbers(callback:(numberOne:number, numberTwo:number) => void){
+
+  const url = "https://cors-anywhere.herokuapp.com/http://www.randomnumberapi.com/api/v1.0/random?min=0&max=9&count=2";
+
+  axios.get(url)
+    .then(resp => {
+      console.log("random number : ",resp.data)
+      if(Array.isArray(resp.data)){
+        callback(resp.data[0], resp.data[1])
+      }
+      else{
+        callback(0, 0)
+      }
+    })
+    .catch(error => {
+      console.error("Failed to fetch random number "+error)
+      callback(0, 0)
+    })
+}
+
+
+function getShortestPathDataEcho(){
+
+  const url = "https://cors-anywhere.herokuapp.com/http://echo.free.beeceptor.com/sample-request?author=beeceptor"
+
+  isLoading.value = true;
+
+  axios.post(url, shortestPathData.value)
+    .then(resp=>{
+      console.log("echo response: ", resp)
+      console.log("echo response type: ", typeof resp.data)
+      isLoading.value = false;
+      echoedResponse.value = resp.data;
+      showEchoedData.value = true;
+    })
+    .catch(error => {
+      console.error("Failed to echo the output "+error)
+      isLoading.value = false;
+      showEchoedData.value = true;
+    })
+}
+
+
+function hideEchoedData(){
+  echoedResponse.value = null;
+  showEchoedData.value = false;
 }
 
 
@@ -82,7 +148,15 @@ onMounted(()=>{
       <p>Discovering Optimal Routes Through Nodes Using Dijkstra's Method</p>
     </div>
 
-    <v-card class="card" variant="elevated">
+    <v-progress-circular
+      v-if="isLoading"
+      :size="70"
+      :width="7"
+      color="#1154A3"
+      indeterminate
+    />
+
+    <v-card class="card" variant="elevated" v-else>
       <div>
         <v-row no-gutters class="row">
           <v-col>
@@ -107,6 +181,11 @@ onMounted(()=>{
                 :items="graphNodeNames"
               />
 
+              <div class="random-selection" @click="setRandomNumbers">
+                Select nodes randomly!
+              </div>
+              <br>
+
               <div class="buttons">
                 <v-btn
                   class="btn"
@@ -120,6 +199,7 @@ onMounted(()=>{
                   class="btn"
                   append-icon="mdi-calculator"
                   color="#DA753C"
+                  :disabled="fromNode === null || toNode === null"
                   @click="calculateShortestPath">
                   Calculate
                 </v-btn>
@@ -135,6 +215,17 @@ onMounted(()=>{
                   <span>From Node Name = '{{fromNode}}', To Node Name = '{{toNode}}': {{shortestPathData.getNodeNames()}}</span> <br>
                   <br>
                   <span>Total distance {{shortestPathData.distance}}</span>
+
+                  <div class="echo">
+                    <v-btn
+                      class="btn"
+                      variant="outlined"
+                      color="#DA753C"
+                      @click="getShortestPathDataEcho">
+                      Check echoed result!
+                    </v-btn>
+                  </div>
+                  <br>
                 </div>
               </div>
               <div v-else class="image-wrapper">
@@ -149,13 +240,14 @@ onMounted(()=>{
         </v-row>
       </div>
     </v-card>
+
+    <echoed-data-viewer-component
+      v-if="showEchoedData"
+      :data="echoedResponse === null ? {} : echoedResponse"
+      @click:outside="hideEchoedData"
+    />
+
   </div>
-
-
-
-<!--  <v-card>-->
-
-<!--  </v-card>-->
 </template>
 
 <style scoped>
@@ -240,6 +332,16 @@ onMounted(()=>{
 
   .buttons > .btn{
     margin-right: 15px;
+  }
+
+  .random-selection:hover{
+    color: #1154A3;
+    font-weight: bolder;
+  }
+
+  .echo{
+    margin-top: 1em;
+    text-align: center;
   }
 </style>
 

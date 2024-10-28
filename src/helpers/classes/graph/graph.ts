@@ -69,7 +69,7 @@ export class Graph{
 
     if(fromNode && toNode) {
       let visitedNodes: Node[] = [];
-      let unvisitedNodes: Node[] = this.nodes;
+      let unvisitedNodes: Node[] = [...this.nodes];
 
       let nodeDistanceRegistry : NodeDistanceRegistry = new NodeDistanceRegistry();
       let previousNodes: Map<string, Node|null> = new Map(); // map to track the previous nodes

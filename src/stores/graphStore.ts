@@ -4,6 +4,7 @@ import {Node} from "@/helpers/classes/graph/node";
 import type {NullableShortestPathData} from "@/helpers/typeAliases";
 
 export const useGraphStore = defineStore('graphStore', {
+  // not using anymore
   state: () => {
 
     return {
