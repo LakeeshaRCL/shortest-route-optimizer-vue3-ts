@@ -16,9 +16,17 @@ const props = defineProps({
 <template>
   <v-dialog v-model="showDialogBox" width="900px">
     <v-card>
-      <v-card-title>
-        Echoed Shortest Path Result
-      </v-card-title>
+      <v-toolbar>
+        <v-toolbar-title>Echoed Shortest Path Result</v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-toolbar-items>
+          <v-btn
+            icon="mdi-close"
+            @click="$emit('close')"
+          />
+        </v-toolbar-items>
+      </v-toolbar>
+
       <v-divider/>
       <v-spacer/>
 

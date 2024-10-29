@@ -101,7 +101,7 @@ function setRandomNodes(){
  */
 function getRandomNumbers(callback:(numberOne:number, numberTwo:number) => void){
 
-  const url = "https://cors-anywhere.herokuapp.com/http://www.randomnumberapi.com/api/v1.0/random?min=0&max=9&count=2";
+  const url = "/api/random?min=0&max=9&count=2";
 
   axios.get(url)
     .then(resp => {
@@ -125,7 +125,7 @@ function getRandomNumbers(callback:(numberOne:number, numberTwo:number) => void)
  */
 function getShortestPathDataEcho(){
 
-  const url = "https://cors-anywhere.herokuapp.com/http://echo.free.beeceptor.com/sample-request?author=beeceptor"
+  const url = "/api/echo"
 
   isLoading.value = true;
 
@@ -263,6 +263,7 @@ onMounted(()=>{
       v-if="showEchoedData"
       :data="echoedResponse === null ? {} : echoedResponse"
       @click:outside="hideEchoedData"
+      @close="hideEchoedData"
     />
 
   </div>
