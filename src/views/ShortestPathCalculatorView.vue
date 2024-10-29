@@ -1,7 +1,6 @@
 <script setup lang="ts">
 
 import {onMounted, ref, type Ref} from "vue";
-
 import type {NullableShortestPathData, NullableString} from "@/helpers/typeAliases";
 import {Graph} from "@/helpers/classes/graph/graph";
 import axios from "axios";
@@ -21,9 +20,12 @@ let showEchoedData: Ref<boolean> = ref( false )
 let echoedResponse: Ref<object | null> = ref(null);
 
 
+/**
+ * A function to initialize the graph
+ */
 function initGraph(){
   // setting up the graph
-// add nodes
+  // add nodes
   graphNodeNames.value.forEach(gnn =>{
     graph.addNode(new Node(gnn))
   })
@@ -58,6 +60,9 @@ function initGraph(){
 }
 
 
+/**
+ * This function can be used to clear the calculated results and input bindings
+ */
 function clear(){
   shortestPathData.value = null;
   fromNode.value = null;
@@ -65,6 +70,9 @@ function clear(){
 }
 
 
+/**
+ * This function can be used to calculate the shortest path data based on selected nodes
+ */
 function calculateShortestPath(){
   if(fromNode.value !== null && toNode.value !== null) {
     shortestPathData.value = graph.getShortestPath(fromNode.value, toNode.value)
@@ -72,7 +80,10 @@ function calculateShortestPath(){
 }
 
 
-function setRandomNumbers(){
+/**
+ * This function is used to set random nodes to inputs
+ */
+function setRandomNodes(){
   isLoading.value = true;
   clear();
 
@@ -84,7 +95,10 @@ function setRandomNumbers(){
 }
 
 
-
+/**
+ * This function can be used to fetch a random number using an API
+ * @param callback a callback function that will be called when the data is fetched
+ */
 function getRandomNumbers(callback:(numberOne:number, numberTwo:number) => void){
 
   const url = "https://cors-anywhere.herokuapp.com/http://www.randomnumberapi.com/api/v1.0/random?min=0&max=9&count=2";
@@ -106,6 +120,9 @@ function getRandomNumbers(callback:(numberOne:number, numberTwo:number) => void)
 }
 
 
+/**
+ * This function can be used to get the echoed shortest path data from an API
+ */
 function getShortestPathDataEcho(){
 
   const url = "https://cors-anywhere.herokuapp.com/http://echo.free.beeceptor.com/sample-request?author=beeceptor"
@@ -149,10 +166,11 @@ onMounted(()=>{
     </div>
 
     <v-progress-circular
+      class="progress"
       v-if="isLoading"
-      :size="70"
-      :width="7"
-      color="#1154A3"
+      :size="90"
+      :width="8"
+      color="blue-lighten-3"
       indeterminate
     />
 
@@ -181,14 +199,14 @@ onMounted(()=>{
                 :items="graphNodeNames"
               />
 
-              <div class="random-selection" @click="setRandomNumbers">
+              <div class="random-selection" @click="setRandomNodes">
                 Select nodes randomly!
               </div>
               <br>
 
               <div class="buttons">
                 <v-btn
-                  class="btn"
+                  class="btn text-none"
                   variant="outlined"
                   color="#DA753C"
                   @click="clear">
@@ -196,7 +214,7 @@ onMounted(()=>{
                 </v-btn>
 
                 <v-btn
-                  class="btn"
+                  class="btn text-none"
                   append-icon="mdi-calculator"
                   color="#DA753C"
                   :disabled="fromNode === null || toNode === null"
@@ -212,17 +230,17 @@ onMounted(()=>{
                 <h3>Result</h3>
 
                 <div class="result-content">
-                  <span>From Node Name = '{{fromNode}}', To Node Name = '{{toNode}}': {{shortestPathData.getNodeNames()}}</span> <br>
+                  <span>From Node Name = "{{fromNode}}", To Node Name = "{{toNode}}": {{shortestPathData.getNodeNames()}}</span> <br>
                   <br>
-                  <span>Total distance {{shortestPathData.distance}}</span>
+                  <span>Total distance: {{shortestPathData.distance}}</span>
 
                   <div class="echo">
                     <v-btn
-                      class="btn"
+                      class="btn text-none"
                       variant="outlined"
                       color="#DA753C"
                       @click="getShortestPathDataEcho">
-                      Check echoed result!
+                      Check echoed result
                     </v-btn>
                   </div>
                   <br>
@@ -249,6 +267,7 @@ onMounted(()=>{
 
   </div>
 </template>
+
 
 <style scoped>
   .background{
@@ -306,7 +325,7 @@ onMounted(()=>{
     background-color: #FFFFFF;
     height: 30vh;
     padding: 2em;
-    color: #5A5B5D;
+    color: #3B3C3F;
   }
 
   .image-wrapper{
@@ -343,5 +362,10 @@ onMounted(()=>{
     margin-top: 1em;
     text-align: center;
   }
+
+  .progress{
+    margin-top: 6em;
+  }
+
 </style>
 

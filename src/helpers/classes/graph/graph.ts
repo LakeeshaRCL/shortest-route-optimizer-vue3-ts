@@ -77,7 +77,7 @@ export class Graph{
       // initialize node distances
       this.nodes.forEach(node =>{
         nodeDistanceRegistry.nodeDistances.push(new NodeDistance(node.name, node === fromNode ? 0 : Infinity))
-        previousNodes.set(node.name, null); // **Initialize previous nodes**
+        previousNodes.set(node.name, null);
       });
 
       // console.log("Initial Node distances registry: ", nodeDistanceRegistry)
@@ -88,13 +88,11 @@ export class Graph{
       // looping through unvisited nodes
       while (unvisitedNodes.length > 0){
 
-
         // Sort unvisited nodes by distance
         unvisitedNodes.sort((a, b) => nodeDistanceRegistry.getNodeDistance(a.name) - nodeDistanceRegistry.getNodeDistance(b.name));
 
         // unvisited node
         let visitingNode = unvisitedNodes[0];
-
 
 
         // go through the edges and calculate the distances
@@ -108,7 +106,7 @@ export class Graph{
             // calculate distance and update
             let newDistance = nodeDistanceRegistry.getNodeDistance(visitingNode.name) + edge.weight;
 
-            // only update if the distance is lower
+            // only update if the distance is lower than the current distance
             if(newDistance < nodeDistanceRegistry.getNodeDistance(edge.to.name)){
               nodeDistanceRegistry.setNodeDistance(edge.to.name, newDistance)
               previousNodes.set(edge.to.name, visitingNode); // track the previous node
@@ -133,15 +131,14 @@ export class Graph{
       // get the path
       let currentNode : null| Node = toNode; // start from the end node and then backtrack
 
+      // generate path sequence
       while (currentNode) {
-        shortestPthData.nodeNames.unshift(currentNode.name); // **Build path in reverse**
-        currentNode = previousNodes.get(currentNode.name) ?? null; // **Move to the previous node**
+        shortestPthData.nodeNames.unshift(currentNode.name); // add node to the front
+        currentNode = previousNodes.get(currentNode.name) ?? null; // get the next node
       }
 
-      // define the output
+      // set total distance between the nodes
       shortestPthData.distance =  nodeDistanceRegistry.getNodeDistance(to);
-
-
     }
     else{
       shortestPthData = null;
