@@ -2,7 +2,8 @@
 
 This template should help get you started developing with Vue 3 in Vite.
 
-
+## Note
+The APIs used in this project throw cross-origin exceptions. To overcome this problem, I used a forward proxy to pass the API calls to the respective origins.
 
 ## Type Support for `.vue` Imports in TS
 
